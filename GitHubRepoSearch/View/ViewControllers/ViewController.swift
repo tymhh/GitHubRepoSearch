@@ -44,10 +44,6 @@ class ViewController: UIViewController {
     }
     
     fileprivate func searchRepositories(query: String, sort: String? = "stars-desc") {
-        notificationLabel.isHidden = true
-        treadManager?.cancel()
-        results.removeAll()
-        repositories.removeAll()
         treadManager = ThreadManager(resourse: repositories.last?.cursor, code: { cursor in
             self.networkService.searchRepositories(query: query, sort: sort ?? "stars-desc", first: 15, after: (cursor as? String), success: {[weak self] repos in
                 let fragments = repos.search.edges?.map {$0?.node?.fragments}
@@ -73,9 +69,15 @@ class ViewController: UIViewController {
 extension ViewController: UISearchResultsUpdating, UISearchBarDelegate {
     func updateSearchResults(for searchController: UISearchController) {
         if let searchText = searchController.searchBar.text, searchText != "" {
+            notificationLabel.isHidden = true
+            tableView.isHidden = false
+            treadManager?.cancel()
+            results.removeAll()
+            repositories.removeAll()
             searchRepositories(query: searchText)
             tableView.reloadData()
         } else {
+            tableView.isHidden = true
             notificationLabel.isHidden = false
             notificationLabel.text = "Start enter text for search"
             view.endEditing(true)
@@ -154,15 +156,17 @@ extension ViewController {
         notificationLabel.numberOfLines = 0
         notificationLabel.translatesAutoresizingMaskIntoConstraints = false
         notificationLabel.textAlignment = .center
-        tableView.addSubview(notificationLabel)
+        view.addSubview(notificationLabel)
+        
+        view.backgroundColor = tableView.backgroundColor
         
         cntKeyboard = tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         cnts += [tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)]
         cnts += [tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor)]
         cnts += [tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)]
         cnts += [cntKeyboard]
-        cnts += [notificationLabel.centerYAnchor.constraint(equalTo: tableView.centerYAnchor)]
-        cnts += NSLayoutConstraint.constraints(withVisualFormat: "|-[label]-|", options: [], metrics: nil, views: ["label": notificationLabel])
+        cnts += [notificationLabel.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor)]
+        cnts += NSLayoutConstraint.constraints(withVisualFormat: "H:|-[label]-|", options: [], metrics: nil, views: ["label": notificationLabel])
         
         NSLayoutConstraint.activate(cnts)
     }
