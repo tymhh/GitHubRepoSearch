@@ -8,3 +8,21 @@ query numberOfRepos($number_of_repos: Int!) {
         }
     }
 }
+
+query search($q: String!) {
+    search(type: REPOSITORY, query: $q, first: 15) {
+        edges {
+            node {
+                ... Details
+            }
+        }
+    }
+}
+
+fragment Details on Repository {
+    nameWithOwner
+    url
+    stargazers {
+        totalCount
+    }
+}

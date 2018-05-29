@@ -40,8 +40,18 @@ class ViewController: UIViewController {
     fileprivate func getRepositories() {
         networkService.getRepos(offset: 10, success: { [weak self] repos in
             self?.repositories = repos.viewer.repositories.nodes?.map {$0?.name ?? ""} ?? []
-            }, failure: {[weak self] error in
+            }, failure: { error in
                 print(error)
+        })
+    }
+    
+    fileprivate func searchRepositories(query: String, sort: String? = "stars-desc") {
+        networkService.searchRepositories(query: query, sort: sort ?? "stars-desc", success: {[weak self] repos in
+            let fragments = repos.search.edges?.map {$0?.node?.fragments}
+            let dets = fragments?.map {$0?.details}
+            self?.repositories = dets?.map {$0?.nameWithOwner ?? ""} ?? []
+        }, failure: { error in
+            print(error)
         })
     }
 }
@@ -60,7 +70,7 @@ extension ViewController: UISearchResultsUpdating, UISearchBarDelegate {
     }
     
     func filterItems(searchText: String) {
-        
+        searchRepositories(query: searchText)
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
@@ -91,7 +101,6 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
 
 extension ViewController {
     func loadStaticNavigationBar() {
-        navigationController?.navigationBar.barTintColor = UIColor.brown
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
     }
