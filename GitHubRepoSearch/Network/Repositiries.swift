@@ -16,7 +16,7 @@ extension GraphQLService {
 
 extension SearchQuery.Data.Search.Edge.Node.Fragments: Repository {
     var name: String {
-        return self.details?.nameWithOwner ?? ""
+        return self.details?.nameWithOwner.trunc(length: 30) ?? ""
     }
     
     var url: String {
@@ -25,5 +25,11 @@ extension SearchQuery.Data.Search.Edge.Node.Fragments: Repository {
     
     var cursor: String {
         return self.cursor
+    }
+}
+
+private extension String {
+    func trunc(length: Int, trailing: String = "…") -> String? {
+        return (self.count > length) ? self.prefix(length) + trailing : self
     }
 }

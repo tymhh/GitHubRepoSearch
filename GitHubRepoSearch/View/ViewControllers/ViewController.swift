@@ -6,12 +6,18 @@ class ViewController: UIViewController {
     fileprivate var notificationLabel: UILabel!
     fileprivate var searchController: UISearchController?
     fileprivate var repositories: [Repository] = []
-    fileprivate var treadManager: ThreadManager?
+    fileprivate var threadManager: ThreadManager?
     fileprivate var cntKeyboard: NSLayoutConstraint!
+    fileprivate var cache: [String: [Repository]] = [:]
     
     fileprivate var results: [Repository] = [] {
         didSet {
-            insertRows(for: Array(results.dropFirst(oldValue.count)))
+            if results.isEmpty || oldValue.count >= results.count || oldValue.count == 0 {
+                repositories = results
+                tableView.reloadData()
+            } else {
+                insertRows(for: Array(results.dropFirst(oldValue.count)))
+            }
         }
     }
     
@@ -44,16 +50,19 @@ class ViewController: UIViewController {
     }
     
     fileprivate func searchRepositories(query: String, sort: String? = "stars-desc") {
-        treadManager = ThreadManager(resourse: repositories.last?.cursor, code: { cursor in
+        threadManager?.cancel()
+        threadManager = ThreadManager(resourse: repositories.last?.cursor, code: { cursor in
             self.networkService.searchRepositories(query: query, sort: sort ?? "stars-desc", first: 15, after: (cursor as? String), success: {[weak self] repos in
                 let fragments = repos.search.edges?.map {$0?.node?.fragments}
-                self?.results.append(contentsOf: (fragments as? [Repository]) ?? [])
+                let repositories = fragments as? [Repository] ?? []
+                self?.cache[query]?.append(contentsOf: repositories)
+                self?.results.append(contentsOf: repositories)
                 }, failure: { [weak self] error in
                     self?.notificationLabel.isHidden = false
                     self?.notificationLabel.text = error.localizedDescription
             })
         })
-        treadManager?.execute()
+        threadManager?.execute()
     }
     
     fileprivate func insertRows(for repos: [Repository]) {
@@ -71,10 +80,15 @@ extension ViewController: UISearchResultsUpdating, UISearchBarDelegate {
         if let searchText = searchController.searchBar.text, searchText != "" {
             notificationLabel.isHidden = true
             tableView.isHidden = false
-            treadManager?.cancel()
             results.removeAll()
             repositories.removeAll()
-            searchRepositories(query: searchText)
+            if let cache = cache[searchText] {
+                threadManager?.cancel()
+                results = cache
+            } else {
+                cache[searchText] = []
+                searchRepositories(query: searchText)
+            }
             tableView.reloadData()
         } else {
             tableView.isHidden = true
@@ -136,6 +150,7 @@ extension ViewController {
 
 extension ViewController {
     func loadStaticNavigationBar() {
+        title = "GitHub Repository Search"
         navigationController?.navigationBar.barTintColor = UIColor.yellow.withAlphaComponent(0.7)
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
