@@ -17,6 +17,8 @@
 		843512BD20BD422200DAA0EB /* Repositories.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 843512BC20BD422200DAA0EB /* Repositories.graphql */; };
 		84ADB16B20BD72A900EFB877 /* GraphQLService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ADB16A20BD72A900EFB877 /* GraphQLService.swift */; };
 		84ADB16D20BD731700EFB877 /* Repositiries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ADB16C20BD731700EFB877 /* Repositiries.swift */; };
+		84FFA06A20BDE838009E05F2 /* ThreadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FFA06920BDE838009E05F2 /* ThreadManager.swift */; };
+		84FFA06D20BDEADB009E05F2 /* Repository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FFA06C20BDEADB009E05F2 /* Repository.swift */; };
 		BE875BDC847D56BFA5983B41 /* Pods_GitHubRepoSearch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D53FD43BBCB0E8C89906563 /* Pods_GitHubRepoSearch.framework */; };
 /* End PBXBuildFile section */
 
@@ -48,6 +50,8 @@
 		843512BC20BD422200DAA0EB /* Repositories.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = Repositories.graphql; sourceTree = "<group>"; };
 		84ADB16A20BD72A900EFB877 /* GraphQLService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphQLService.swift; sourceTree = "<group>"; };
 		84ADB16C20BD731700EFB877 /* Repositiries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Repositiries.swift; sourceTree = "<group>"; };
+		84FFA06920BDE838009E05F2 /* ThreadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadManager.swift; sourceTree = "<group>"; };
+		84FFA06C20BDEADB009E05F2 /* Repository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Repository.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,7 +96,8 @@
 		8435129720BD3FA500DAA0EB /* GitHubRepoSearch */ = {
 			isa = PBXGroup;
 			children = (
-				84ADB17220BD7C9300EFB877 /* Protocols */,
+				84FFA06B20BDEAC7009E05F2 /* Protocols */,
+				84FFA06820BDE825009E05F2 /* Helpers */,
 				84ADB16E20BD7BFF00EFB877 /* View */,
 				843512BB20BD41E200DAA0EB /* Network */,
 				8435129820BD3FA500DAA0EB /* AppDelegate.swift */,
@@ -140,9 +145,18 @@
 			path = ViewControllers;
 			sourceTree = "<group>";
 		};
-		84ADB17220BD7C9300EFB877 /* Protocols */ = {
+		84FFA06820BDE825009E05F2 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				84FFA06920BDE838009E05F2 /* ThreadManager.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
+		84FFA06B20BDEAC7009E05F2 /* Protocols */ = {
+			isa = PBXGroup;
+			children = (
+				84FFA06C20BDEADB009E05F2 /* Repository.swift */,
 			);
 			path = Protocols;
 			sourceTree = "<group>";
@@ -322,7 +336,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84FFA06D20BDEADB009E05F2 /* Repository.swift in Sources */,
 				8435129B20BD3FA500DAA0EB /* ViewController.swift in Sources */,
+				84FFA06A20BDE838009E05F2 /* ThreadManager.swift in Sources */,
 				84ADB16D20BD731700EFB877 /* Repositiries.swift in Sources */,
 				8414F2A020BD430A002C0AE3 /* API.swift in Sources */,
 				8435129920BD3FA500DAA0EB /* AppDelegate.swift in Sources */,

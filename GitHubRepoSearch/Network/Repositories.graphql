@@ -1,17 +1,7 @@
-query numberOfRepos($number_of_repos: Int!) {
-    viewer {
-        name
-        repositories(last: $number_of_repos) {
-            nodes {
-                name
-            }
-        }
-    }
-}
-
-query search($q: String!) {
-    search(type: REPOSITORY, query: $q, first: 15) {
+query search($q: String!, $after: String, $first: Int) {
+    search(type: REPOSITORY, query: $q, first: $first, after: $after) {
         edges {
+            cursor
             node {
                 ... Details
             }
