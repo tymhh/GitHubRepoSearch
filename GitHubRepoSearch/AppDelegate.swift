@@ -13,8 +13,17 @@ let apollo: ApolloClient = {
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        
+        loadWindow()
+        let naVc = UINavigationController(rootViewController: ViewController())
+        (UIApplication.shared.delegate as? AppDelegate)?.window?.rootViewController = naVc
         return true
     }
+    
+    private func loadWindow() {
+        let window = UIWindow.init(frame: UIScreen.main.bounds)
+        let storyboard = UIStoryboard(name: "LaunchScreen", bundle: nil)
+        window.rootViewController = storyboard.instantiateViewController(withIdentifier: "LaunchScreenController")
+        (UIApplication.shared.delegate as? AppDelegate)?.window = window
+        window.makeKeyAndVisible()
+    }
 }
-
