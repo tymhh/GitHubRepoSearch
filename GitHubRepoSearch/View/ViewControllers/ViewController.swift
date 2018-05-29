@@ -9,6 +9,7 @@ class ViewController: UIViewController {
     fileprivate var threadManager: ThreadManager?
     fileprivate var cntKeyboard: NSLayoutConstraint!
     fileprivate var cache: [String: [Repository]] = [:]
+    fileprivate var currentQueryString: String = ""
     
     fileprivate var results: [Repository] = [] {
         didSet {
@@ -52,11 +53,16 @@ class ViewController: UIViewController {
     fileprivate func searchRepositories(query: String, sort: String? = "stars-desc") {
         threadManager?.cancel()
         threadManager = ThreadManager(resourse: repositories.last?.cursor, code: { cursor in
-            self.networkService.searchRepositories(query: query, sort: sort ?? "stars-desc", first: 15, after: (cursor as? String), success: {[weak self] repos in
-                let fragments = repos.search.edges?.map {$0?.node?.fragments}
-                let repositories = fragments as? [Repository] ?? []
-                self?.cache[query]?.append(contentsOf: repositories)
-                self?.results.append(contentsOf: repositories)
+            self.networkService.searchRepositories(query: query, sort: sort ?? "stars-desc", first: 15, after: (cursor as? String), success: {[weak self] response in
+                if self?.searchController?.isActive == false && self?.currentQueryString != "" { return }
+                let correctQueryString = response.0 == self?.currentQueryString
+                if correctQueryString {
+                    self?.currentQueryString = query
+                    let fragments = response.1.search.edges?.map {$0?.node?.fragments}
+                    let repositories = fragments as? [Repository] ?? []
+                    self?.cache[query]?.append(contentsOf: repositories)
+                    self?.results.append(contentsOf: repositories)
+                }
                 }, failure: { [weak self] error in
                     self?.notificationLabel.isHidden = false
                     self?.notificationLabel.text = error.localizedDescription
@@ -82,6 +88,7 @@ extension ViewController: UISearchResultsUpdating, UISearchBarDelegate {
             tableView.isHidden = false
             results.removeAll()
             repositories.removeAll()
+            currentQueryString = searchText
             if let cache = cache[searchText] {
                 threadManager?.cancel()
                 results = cache
