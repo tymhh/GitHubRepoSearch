@@ -3,8 +3,8 @@ import UIKit
 class ViewController: UIViewController {
     fileprivate var networkService: GraphQLService = GraphQLService()
     fileprivate var tableView: UITableView!
+    fileprivate var notificationLabel: UILabel!
     fileprivate var searchController: UISearchController?
-    fileprivate var isSearching: Bool = false
     fileprivate var repositories: [Repository] = []
     fileprivate var treadManager: ThreadManager?
     fileprivate var cntKeyboard: NSLayoutConstraint!
@@ -28,6 +28,7 @@ class ViewController: UIViewController {
         searchController?.dimsBackgroundDuringPresentation = false
         searchController?.hidesNavigationBarDuringPresentation = false
         loadStaticNavigationBar()
+        notificationLabel.text = "Start enter text for search"
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -43,6 +44,7 @@ class ViewController: UIViewController {
     }
     
     fileprivate func searchRepositories(query: String, sort: String? = "stars-desc") {
+        notificationLabel.isHidden = true
         treadManager?.cancel()
         results.removeAll()
         repositories.removeAll()
@@ -50,8 +52,9 @@ class ViewController: UIViewController {
             self.networkService.searchRepositories(query: query, sort: sort ?? "stars-desc", first: 15, after: (cursor as? String), success: {[weak self] repos in
                 let fragments = repos.search.edges?.map {$0?.node?.fragments}
                 self?.results.append(contentsOf: (fragments as? [Repository]) ?? [])
-                }, failure: { error in
-                    print(error)
+                }, failure: { [weak self] error in
+                    self?.notificationLabel.isHidden = false
+                    self?.notificationLabel.text = error.localizedDescription
             })
         })
         treadManager?.execute()
@@ -70,18 +73,14 @@ class ViewController: UIViewController {
 extension ViewController: UISearchResultsUpdating, UISearchBarDelegate {
     func updateSearchResults(for searchController: UISearchController) {
         if let searchText = searchController.searchBar.text, searchText != "" {
-            isSearching = true
-            filterItems(searchText: searchText)
+            searchRepositories(query: searchText)
             tableView.reloadData()
         } else {
-            isSearching = false
+            notificationLabel.isHidden = false
+            notificationLabel.text = "Start enter text for search"
             view.endEditing(true)
             tableView.reloadData()
         }
-    }
-    
-    func filterItems(searchText: String) {
-        searchRepositories(query: searchText)
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
@@ -143,6 +142,7 @@ extension ViewController {
     func loadStaticViews() {
         var cnts: [NSLayoutConstraint] = []
         
+        
         tableView = UITableView(frame: .zero, style: .grouped)
         tableView.delegate = self
         tableView.dataSource = self
@@ -150,11 +150,19 @@ extension ViewController {
         view.addSubview(tableView)
         view.sendSubview(toBack: tableView)
         
+        notificationLabel = UILabel()
+        notificationLabel.numberOfLines = 0
+        notificationLabel.translatesAutoresizingMaskIntoConstraints = false
+        notificationLabel.textAlignment = .center
+        tableView.addSubview(notificationLabel)
+        
         cntKeyboard = tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         cnts += [tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)]
         cnts += [tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor)]
         cnts += [tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)]
         cnts += [cntKeyboard]
+        cnts += [notificationLabel.centerYAnchor.constraint(equalTo: tableView.centerYAnchor)]
+        cnts += NSLayoutConstraint.constraints(withVisualFormat: "|-[label]-|", options: [], metrics: nil, views: ["label": notificationLabel])
         
         NSLayoutConstraint.activate(cnts)
     }
