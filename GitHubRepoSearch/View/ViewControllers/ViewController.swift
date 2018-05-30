@@ -57,7 +57,7 @@ class ViewController: UIViewController {
     fileprivate func searchRepositories(query: String, sort: String? = "stars-desc") {
         threadManager?.cancel()
         threadManager = ThreadManager(resourse: repositories.last?.cursor, code: { cursor in
-            self.networkService.searchRepositories(query: query, sort: sort ?? "stars-desc", first: 15, after: (cursor as? String), success: {[weak self] response in
+            self.networkService.searchRepositories(query: query, sort: sort, first: 15, after: (cursor as? String), success: {[weak self] response in
                 if self?.searchController?.isActive == false && self?.currentQueryString != "" { return }
                 let correctQueryString = response.0 == self?.currentQueryString
                 if correctQueryString {
@@ -122,7 +122,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         var cell: UITableViewCell
-        if let cell_ = tableView.dequeueReusableCell(withIdentifier: "cell") as? UITableViewCell {
+        if let cell_ = tableView.dequeueReusableCell(withIdentifier: "cell") {
             cell = cell_
         } else {
             cell = UITableViewCell(style: .default, reuseIdentifier: "cell")

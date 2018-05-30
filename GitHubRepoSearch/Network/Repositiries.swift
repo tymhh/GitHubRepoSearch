@@ -1,8 +1,8 @@
 import Foundation
 
 extension GraphQLService {
-    func searchRepositories(query: String, sort: String, first: Int?, after: String?, success: SuccessHandler<(String, SearchQuery.Data)>?, failure: FailureHandler?) {
-        let str = "\(query) sort:\(sort)"
+    func searchRepositories(query: String, sort: String?, first: Int?, after: String?, success: SuccessHandler<(String, SearchQuery.Data)>?, failure: FailureHandler?) {
+        let str = "\(query) sort:\(sort ?? "stars-desc")"
         let request = SearchQuery(q: str, after: after, first: first)
         fetch(request: request, success: { data in
             if let data = data as? SearchQuery.Data {
