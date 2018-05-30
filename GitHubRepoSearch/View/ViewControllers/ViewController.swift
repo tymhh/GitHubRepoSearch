@@ -1,4 +1,5 @@
 import UIKit
+import PTPopupWebView
 
 class ViewController: UIViewController {
     fileprivate var networkService: GraphQLService = GraphQLService()
@@ -10,6 +11,9 @@ class ViewController: UIViewController {
     fileprivate var cntKeyboard: NSLayoutConstraint!
     fileprivate var cache: [String: [Repository]] = [:]
     fileprivate var currentQueryString: String = ""
+    fileprivate lazy var popupWebView: PTPopupWebViewController = {
+        return PTPopupWebViewController()
+    }()
     
     fileprivate var results: [Repository] = [] {
         didSet {
@@ -35,7 +39,7 @@ class ViewController: UIViewController {
         searchController?.dimsBackgroundDuringPresentation = false
         searchController?.hidesNavigationBarDuringPresentation = false
         loadStaticNavigationBar()
-        notificationLabel.text = "Start enter text for search"
+        notificationLabel.text = "Start typing to search"
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -100,7 +104,7 @@ extension ViewController: UISearchResultsUpdating, UISearchBarDelegate {
         } else {
             tableView.isHidden = true
             notificationLabel.isHidden = false
-            notificationLabel.text = "Start enter text for search"
+            notificationLabel.text = "Start typing to search"
             view.endEditing(true)
             tableView.reloadData()
         }
@@ -129,6 +133,11 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return repositories.count
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let _ = popupWebView.popupView.URL(string: repositories[indexPath.row].url)
+        popupWebView.show()
     }
 }
 
