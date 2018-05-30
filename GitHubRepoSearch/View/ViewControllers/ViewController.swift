@@ -64,15 +64,24 @@ class ViewController: UIViewController {
                     self?.currentQueryString = query
                     let fragments = response.1.search.edges?.map {$0?.node?.fragments}
                     let repositories = fragments as? [Repository] ?? []
-                    self?.cache[query]?.append(contentsOf: repositories)
-                    self?.results.append(contentsOf: repositories)
+                    if repositories.isEmpty {
+                        self?.errorHandler(with: "Empty result.\nTry another query")
+                    } else {
+                        self?.cache[query]?.append(contentsOf: repositories)
+                        self?.results.append(contentsOf: repositories)
+                    }
                 }
                 }, failure: { [weak self] error in
-                    self?.notificationLabel.isHidden = false
-                    self?.notificationLabel.text = error.localizedDescription
+                    self?.errorHandler(with: error.localizedDescription)
             })
         })
         threadManager?.execute()
+    }
+    
+    fileprivate func errorHandler(with error: String) {
+        tableView.isHidden = true
+        notificationLabel.isHidden = false
+        notificationLabel.text = error
     }
     
     fileprivate func insertRows(for repos: [Repository]) {
@@ -82,6 +91,10 @@ class ViewController: UIViewController {
         
         let rows_: [IndexPath] = IndexSet(integersIn: old..<new).map { return IndexPath(row: $0, section: 0) }
         tableView.insertRows(at: rows_, with: .fade)
+    }
+    
+    @objc func stopSearch() {
+        threadManager?.cancel()
     }
 }
 
@@ -166,7 +179,7 @@ extension ViewController {
 
 extension ViewController {
     func loadStaticNavigationBar() {
-        title = "GitHub Repository"
+        title = "GitHub Repositories"
         navigationController?.navigationBar.barTintColor = UIColor.yellow.withAlphaComponent(0.7)
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
@@ -174,7 +187,6 @@ extension ViewController {
     
     func loadStaticViews() {
         var cnts: [NSLayoutConstraint] = []
-        
         
         tableView = UITableView(frame: .zero, style: .grouped)
         tableView.delegate = self
