@@ -89,7 +89,7 @@ extension ViewController: UISearchResultsUpdating, UISearchBarDelegate {
             results.removeAll()
             repositories.removeAll()
             currentQueryString = searchText
-            if let cache = cache[searchText] {
+            if let cache = cache[searchText], !cache.isEmpty {
                 threadManager?.cancel()
                 results = cache
             } else {
@@ -157,7 +157,7 @@ extension ViewController {
 
 extension ViewController {
     func loadStaticNavigationBar() {
-        title = "GitHub Repository Search"
+        title = "GitHub Repository"
         navigationController?.navigationBar.barTintColor = UIColor.yellow.withAlphaComponent(0.7)
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
